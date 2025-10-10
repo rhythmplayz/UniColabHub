@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if user.is_authenticated %}
+
+    <h1>Welcome @{{user}} </h1>
+
+    {% else %}
+<h3>User nai</h3>
+
+
+
+    {% endif %}
+
+</div>
+{% endblock%}

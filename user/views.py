@@ -58,6 +58,17 @@ def login_user(request):
     else:
         return render(request, "user/login_form.html")
 
+# logout view
+def logout_user(request):
+    logout(request)
+    messages.success(request, "You have been logged out.")
+    return redirect('home')
+
+
+# profile view
+def user_profile(request):
+    user = request.user
+    return render(request, 'user/user_profile.html')
 
 # update profile
 @login_required
