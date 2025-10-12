@@ -1,8 +1,7 @@
-from django.db import models
-
-# Create your models here.
 from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 class CollabUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -17,4 +16,17 @@ class CollabUser(models.Model):
     collaborator_joined_on = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username+ " "+self.collaborator_university+ " "+self.collaborator_university_id
+        return (self.user.username+" "+self.collaborator_university+" "+self.collaborator_university_id)
+
+
+class Opinion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    opinion = models.TextField(default='')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    post = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return self.opinion[0:20]
