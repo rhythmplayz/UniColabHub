@@ -1,57 +1,133 @@
-from django.shortcuts import render, redirect
-from .forms import ProjectForm,EventForm,ThesisForm
-from .models import Project,Event,Thesis
-from collaboration.models import Collaborator
+from django.contrib import messages
+from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.dateparse import parse_datetime, parse_date
+
+from .forms import ProjectForm, EventForm, ThesisForm
+from .models import Project, Event, Thesis
+from collaboration.models import Collaborator, Resource
+from user.models import Opinion
+
 
 def create_event(request):
     if request.method == "POST":
-        form = EventForm(request.POST)
-        if form.is_valid():
-            event = form.save(commit=False)
-            collaborator = Collaborator(user=request.user, post=None)
-            collaborator.save()
-            event.organizer = collaborator
-            event.save()
-            collaborator.post = event
-            collaborator.save()
-            return redirect("home")
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        location = request.POST.get('location')
+        status = request.POST.get('status')
+
+        cover_pic = request.FILES.get('cover_pic')
+        schedule = request.FILES.get('schedule')
+
+        start_time = parse_datetime(request.POST.get('start_time'))
+        end_time = parse_datetime(request.POST.get('end_time'))
+
+        collaborator = Collaborator(user=request.user, post=None, role="organizer")
+        collaborator.save()
+
+        event = Event.objects.create(
+            organizer=collaborator,
+            title=title,
+            description=description,
+            location=location,
+            status=status,
+            start_time=start_time,
+            end_time=end_time,
+            cover_pic=cover_pic,
+            schedule=schedule,
+        )
+
+        collaborator.post = event
+        collaborator.save()
+
+        return redirect('home')
     else:
         form = EventForm()
-    return render(request,'post/create_event.html',{"form":form})
+
+    return render(request, 'post/create_event.html', {"form": form})
+
 
 def create_thesis(request):
     if request.method == "POST":
-        form = ThesisForm(request.POST)
-        if form.is_valid():
-            thesis = form.save(commit=False)
-            collaborator = Collaborator(user=request.user, post=None)
-            collaborator.save()
-            thesis.organizer = collaborator
-            thesis.save()
-            collaborator.post = thesis
-            collaborator.save()
-            return redirect("home")
+
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        research_topic = request.POST.get('research_topic')
+        research_field = request.POST.get('research_field')
+
+        start_date = parse_date(request.POST.get('start_date'))
+        end_date = parse_date(request.POST.get('end_date'))
+
+        status = request.POST.get('status')
+
+        cover_pic = request.FILES.get('cover_pic')
+
+        collaborator = Collaborator(user=request.user, post=None, role="organizer")
+        collaborator.save()
+
+        thesis = Thesis.objects.create(
+            organizer=collaborator,
+            title=title,
+            description=description,
+            research_topic=research_topic,
+            research_field=research_field,
+
+            start_date=start_date,
+            end_date=end_date,
+
+            status=status,
+            cover_pic=cover_pic,
+        )
+
+        collaborator.post = thesis
+        collaborator.save()
+        return redirect("home")
     else:
         form = ThesisForm()
-    return render(request,'post/create_thesis.html',{"form":form})
+
+    return render(request, 'post/create_thesis.html', {"form": form})
+
 
 def create_project(request):
     if request.method == "POST":
-        form = ProjectForm(request.POST)
-        if form.is_valid():
-            project = form.save(commit=False)
-            collaborator = Collaborator(user=request.user, post=None)
-            collaborator.save()
-            project.organizer = collaborator
-            project.save()
-            collaborator.post = project
-            collaborator.save()
-            return redirect("home")
 
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+
+        start_date = parse_date(request.POST.get('start_date'))
+        deadline = parse_date(request.POST.get('deadline'))
+
+        status = request.POST.get('status')
+
+        cover_pic = request.FILES.get('cover_pic')
+
+        criteria = request.POST.get('criteria')
+
+        collaborator = Collaborator(user=request.user, post=None, role="organizer")
+        collaborator.save()
+
+        project = Project.objects.create(
+            organizer=collaborator,
+            title=title,
+            description=description,
+
+            start_date=start_date,
+            deadline=deadline,
+
+            status=status,
+            cover_pic=cover_pic,
+
+            criteria=criteria,
+        )
+
+        collaborator.post = project
+        collaborator.save()
+        return redirect("home")
     else:
         form = ProjectForm()
 
-    return render(request,'post/create_project.html',{"form":form})
+    return render(request, 'post/create_project.html', {"form": form})
+
 
 def view_project(request,pk):
     project = Project.objects.get(pk=pk)
