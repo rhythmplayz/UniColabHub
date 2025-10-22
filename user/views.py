@@ -158,3 +158,31 @@ def delete_user(request):
             messages.error(request, "Incorrect password. Please try again.")
 
     return render(request, "user/delete_confirmation.html")
+
+def update_profile_pic(request):
+    profile = CollabUser.objects.get(user=request.user)
+    if request.method == "POST":
+        picture = request.FILES.get("profile_picture")
+        path = None
+        if profile.profile_pic:
+            path = profile.profile_pic.path
+        profile.profile_pic = picture
+        profile.save()
+        if path != None:
+            os.remove(path)
+        return redirect('user:user_profile')
+    return render(request, 'user/change_profile_pic.html', {
+        'profile': profile
+    })
+
+def delete_profile_pic(request):
+    profile = CollabUser.objects.get(user=request.user)
+    if request.method == "POST":
+        path = None
+        if profile.profile_pic:
+            path = profile.profile_pic.path
+        profile.profile_pic = None
+        if path != None:
+            os.remove(path)
+            return redirect('user:user_profile')
+    return render(request, 'user/delete_profile_pic.html', {'profile': profile})
