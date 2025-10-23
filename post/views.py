@@ -163,7 +163,7 @@ def view_project(request, pk):
     for op in opinions:
         if op.post == project:
             op_fil.append(op)
-    content_type = ContentType.objects.get_for_model(Thesis)
+    content_type = ContentType.objects.get_for_model(Project)
     resources = Resource.objects.filter(content_type=content_type, object_id=project.pk)
     return render(request, 'post/view_project.html',
                   {"project": project, "opinions": op_fil, "resources": resources, "type": "project", "obj": project, "collaborator": collaborator, "collaborators": cols})
