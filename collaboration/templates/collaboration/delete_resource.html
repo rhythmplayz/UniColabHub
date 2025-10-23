@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3>Confirm Deletion</h3>
+    <p>Are you sure you want to delete <strong>{{ resource.name }}</strong>?</p>
+
+    <form method="post" action="{% url 'collaboration:confirm_delete' resource.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="model" value="{{ type }}">
+        <input type="hidden" name="object_id" value="{{ obj_id }}">
+
+        <a href="{% url 'collaboration:view_resource' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+</div>
+{% endblock %}
