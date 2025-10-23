@@ -29,7 +29,7 @@
             <p><strong>Department:</strong> {{ resource.department }}</p>
 
             {% if resource.allocated_to %}
-            <p><strong>Allocated To:</strong> {{ resource.allocated_to }}</p>
+            <p><strong>Allocated To:</strong> {{ resource.allocated_to.title }}</p>
             {% else %}
             <p><strong>Allocated To:</strong> Not allocated</p>
             {% endif %}

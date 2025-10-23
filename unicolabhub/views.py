@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from collaboration.models import Notification
 from post.models import Event, Project, Thesis
 from itertools import chain
 import random
@@ -9,6 +10,7 @@ def home(request):
         events = Event.objects.all()
         projects = Project.objects.all()
         theses = Thesis.objects.all()
+        notifications = Notification.objects.filter(user=request.user)
 
         for e in events:
             e.content_type = "Event"
@@ -22,7 +24,7 @@ def home(request):
 
         feed_items = list(chain(events, projects, theses))
 
-        # Add slight random variation to sort key
+        # 🎲 Add slight random variation to sort key
         def sort_key(item):
             # Random factor between -300 and +300 seconds (±5 minutes)
             random_offset = random.uniform(-300, 300)
@@ -31,7 +33,9 @@ def home(request):
 
         # Sort by adjusted key descending (newer + randomness)
         feed_items.sort(key=sort_key, reverse=True)
+        notifications = notifications.order_by('-created_at')
 
-        return render(request, "home.html", {'feed_items': feed_items})
+
+        return render(request, "home.html",{'feed_items':feed_items, 'notifications':notifications})
     else:
         return redirect("user:login_user")
