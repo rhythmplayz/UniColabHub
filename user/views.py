@@ -1,10 +1,15 @@
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+import os
+from itertools import chain
+import random
+
 from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
 from .models import CollabUser
-from .forms import UserUpdateForm, CollabUserUpdateForm
+from post.models import Event, Project, Thesis
+
 
 
 # user registration view

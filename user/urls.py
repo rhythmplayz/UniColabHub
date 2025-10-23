@@ -1,7 +1,5 @@
 
-from django.contrib import admin
-from django.shortcuts import redirect
-from django.urls import path, include
+from django.urls import path
 
 from . import views
 
@@ -14,4 +12,6 @@ urlpatterns = [
     path('user_profile/', views.user_profile, name='user_profile'),
     path('update_profile/', views.update_user, name='update_profile'),
     path('delete_user/', views.delete_user, name='delete_user'),
+    path('update_profile_pic/', views.update_profile_pic, name='update_profile_pic'),
+    path('delete_profile_pic/', views.delete_profile_pic, name='delete_profile_pic'),
 ]
