@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ event.title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4 rounded">
+    <a href="{% url 'home' %}">Go back</a>
+    <div class="row rounded"
+         style="height: calc(100vh - 150px); ">
+
+        <!-- Left Sidebar: Opinions -->
+        <div class="col-md-3 p-2">
+            <div class="card h-100">
+                <div class="card-body">
+                    <!-- Collaborators Section -->
+                    <div class="mb-4 rounded">
+                        <ul class="list-group">
+                            <li class="list-group-item active" data-bs-toggle="collapse" href="#collaboratorsList"
+                                role="button" aria-expanded="true" aria-controls="collaboratorsList">
+                                Collaborators
+                            </li>
+                        </ul>
+
+                        <div class="collapse show rounded" id="collaboratorsList"
+                             style="max-height: 200px; overflow-y: auto; padding-bottom: 10px;">
+                            <ul class="list-group mt-2">
+                                <li class="list-group-item active" data-bs-toggle="collapse"><p>Organizer: {{event.organizer.user.username}}</p></li>
+                                {% for col in collaborators %}
+                                <li class="list-group-item active" data-bs-toggle="collapse"><p>Collaborator: {{col.user.username}}</p></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Opinion input -->
+                    <form method="post" action="{% url 'post:view_event' event.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="opinion" class="form-label">Wanna say something?:</label>
+                            <input type="text" class="form-control" name="opinion" id="opinion" placeholder="Opinion"
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Opinion</button>
+                    </form>
+
+                    <!-- Opinions list -->
+                    <div class="mt-4 rounded">
+                        <ul class="list-group">
+                            <li class="list-group-item active" data-bs-toggle="collapse" href="#opinionsList"
+                                role="button" aria-expanded="false" aria-controls="opinionsList">
+                                Opinions
+                            </li>
+                        </ul>
+
+                        <div class="collapse rounded" id="opinionsList"
+                             style="max-height: calc(100vh - 400px); overflow-y: auto; padding-bottom: 10px;">
+                            <ul class="list-group mt-2">
+                                {% if opinions %}
+                                {% for opinion in opinions %}
+                                <li class="list-group-item">
+                                    <h6>Opinion by <i>{{ opinion.user.username }}</i> on <i>{{ opinion.timestamp }}</i>:
+                                    </h6>
+                                    <p>{{ opinion.opinion }}</p>
+                                </li>
+                                {% endfor %}
+                                {% else %}
+                                <li class="list-group-item">No opinions right now.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Event Details -->
+        <div class="col-md-6 p-2">
+            <div class="card mb-3 shadow-sm" style="height: 100%;">
+                {% if event.cover_pic %}
+                <img src="{{ event.cover_pic.url }}" class="card-img-top" style="max-height: 35em; object-fit: cover;"
+                     alt="Cover image">
+                {% endif %}
+                <div class="card-body" style="overflow-y: scroll;">
+                    {% if collaborator is None and collaborator.role != 'organizer' %}
+                    <div class="pe-3">
+                        <a href="{% url 'collaboration:join_request' event.organizer.id %}" class="btn btn-primary mt-2">Collab in this event</a>
+                    </div>
+                    {% endif %}
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="text-muted"><i>By: {{ event.organizer.user.username }}</i></p>
+                    <p class="text-black">
+                        Posted: {{ event.created_at|date:"M d, Y H:i" }} |
+                        Start: {{ event.start_time|date:"M d, Y H:i" }} |
+                        End: {{ event.end_time|date:"M d, Y H:i" }}
+                    </p>
+                    <p class="text-black">Location: {{ event.location }} | Status: {{ event.status }}</p>
+                    <hr>
+                    <p class="text-black">Description:</p>
+                    <p class="card-text">{{ event.description }}</p>
+
+                    {% if event.schedule %}
+                    <hr>
+                    <p class="text-black">Schedule:</p>
+                    <img src="{{ event.schedule.url }}" class="card-img-top"
+                         style="max-height: 100em; object-fit: cover;" alt="Schedule">
+                    <div class="text-center mt-2">
+                        <a href="{{ event.schedule.url }}" download class="btn btn-primary">
+                            <i class="bi bi-download"></i> Download Schedule
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Add Resource -->
+        <div class="col-md-3 p-2">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex flex-column align-items-center">
+
+                        {% include 'collaboration/add_resource.html' %}
+
+                        <div class="container" style="max-height: calc(100vh - 290px); overflow-y: auto;">
+                            <h3 class="text-center mt-3">Allocate Resources</h3>
+
+                            <ul class="list-group d-flex flex-wrap"
+                                style="flex-direction: row; justify-content: space-evenly; align-items: center;">
+
+                                <!-- Start list loop -->
+                                {% for r in resources %}
+                                <li class="list-group-item rounded w-100"
+                                    style="height: 100px; margin: 10px 0; border: 1px solid #ddd;">
+                                    <div class="d-flex flex-column justify-content-between h-100">
+                                        <p class="d-flex justify-content-between">
+                                            <span class="text-truncate">{{ r.name }}</span>
+                                            <span>{{ r.amount }}</span>
+                                        </p>
+                                        <div class="mt-auto">
+                                            <a class="btn btn-primary btn-sm w-100 mb-1" href="{% url 'collaboration:view_resource' r.pk %}">View</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                                <!-- End list loop -->
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock%}
