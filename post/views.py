@@ -129,17 +129,126 @@ def create_project(request):
     return render(request, 'post/create_project.html', {"form": form})
 
 
-def view_project(request,pk):
+def view_project(request, pk):
     project = Project.objects.get(pk=pk)
-    return render(request,'post/view_project.html',{"project":project})
+    cols = Collaborator.objects.all()
+    cols = [col for col in cols if col.role == "collaborator" and col.post == project]
+    if (project.organizer.user != request.user):
+        collaborators = Collaborator.objects.filter(user=request.user)
+        collaborator = None
+        for col in collaborators:
+            if col.post == project:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+    else:
+        collaborator = None
+        collaborators = Collaborator.objects.filter(user=request.user)
+        for col in collaborators:
+            if col.post == project:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+    if request.method == "POST":
+        opinion = request.POST.get('opinion')
+        if not opinion:
+            messages.error(request, "Opinion cannot be empty.")
+            return redirect('post:view_project', pk=pk)
+        Opinion.objects.create(user=request.user, opinion=opinion, post=project)
+        return redirect('post:view_project', pk=pk)
+    opinions = Opinion.objects.all()
+    op_fil = []
+    for op in opinions:
+        if op.post == project:
+            op_fil.append(op)
+    content_type = ContentType.objects.get_for_model(Thesis)
+    resources = Resource.objects.filter(content_type=content_type, object_id=project.pk)
+    return render(request, 'post/view_project.html',
+                  {"project": project, "opinions": op_fil, "resources": resources, "type": "project", "obj": project, "collaborator": collaborator, "collaborators": cols})
 
-def view_thesis(request,pk):
+
+def view_thesis(request, pk):
     thesis = Thesis.objects.get(pk=pk)
-    return render(request,'post/view_thesis.html',{"thesis":thesis})
+    cols = Collaborator.objects.all()
+    cols = [col for col in cols if col.role == "collaborator" and col.post == thesis]
+    if (thesis.organizer.user != request.user):
+        collaborators = Collaborator.objects.filter(user=request.user)
+        collaborator = None
+        for col in collaborators:
+            if col.post == thesis:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+    else:
+        collaborators = Collaborator.objects.filter(user=request.user)
+        collaborator = None
+        for col in collaborators:
+            if col.post == thesis:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+    if request.method == "POST":
+        opinion = request.POST.get('opinion')
+        if not opinion:
+            messages.error(request, "Opinion cannot be empty.")
+            return redirect('post:view_thesis', pk=pk)
+        Opinion.objects.create(user=request.user, opinion=opinion, post=thesis)
+        return redirect('post:view_thesis', pk=pk)
+    opinions = Opinion.objects.all()
+    op_fil = []
+    for op in opinions:
+        if op.post == thesis:
+            op_fil.append(op)
+    content_type = ContentType.objects.get_for_model(Thesis)
+    resources = Resource.objects.filter(content_type=content_type, object_id=thesis.pk)
+    return render(request, 'post/view_thesis.html',
+                  {"thesis": thesis, "opinions": op_fil, "resources": resources, "type": "thesis", "obj": thesis, "collaborator": collaborator, "collaborators": cols})
 
-def view_event(request,pk):
+
+def view_event(request, pk):
     event = Event.objects.get(pk=pk)
-    return render(request,'post/view_event.html',{"event":event})
+    cols = Collaborator.objects.all()
+    cols = [col for col in cols if col.role == "collaborator" and col.post == event]
+    if(event.organizer.user != request.user):
+        collaborators = Collaborator.objects.filter(user=request.user)
+        collaborator = None
+        for col in collaborators:
+            if col.post == event:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+    else:
+        collaborators = Collaborator.objects.filter(user=request.user)
+        collaborator = None
+        for col in collaborators:
+            if col.post == event:
+                collaborator = col
+                break
+            else:
+                collaborator = None
+
+    if request.method == "POST":
+        opinion = request.POST.get('opinion')
+        if not opinion:
+            messages.error(request, "Opinion cannot be empty.")
+            return redirect('post:view_event', pk=pk)
+        Opinion.objects.create(user=request.user, opinion=opinion, post=event)
+        return redirect('post:view_event', pk=pk)
+    opinions = Opinion.objects.all()
+    op_fil = []
+    for op in opinions:
+        if op.post == event:
+            op_fil.append(op)
+    content_type = ContentType.objects.get_for_model(Event)
+    resources = Resource.objects.filter(content_type=content_type, object_id=event.pk)
+    return render(request, 'post/view_event.html',
+                  {"event": event, "opinions": op_fil, "resources": resources, "type": "event", "obj": event, "collaborator": collaborator, "collaborators": cols})
+
 
 def edit_project(request, pk):
     project = Project.objects.get(pk=pk)
